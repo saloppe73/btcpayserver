@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.0.6.7
+
+### Bug fixes:
+
+* Reverted the new Greenfield API: Can configure lightning payment methods @NicolasDorier
+
+## 1.0.6.6
+
+### Bug fixes:
+
+* Load correct connection string when using SQLite @Kukks
+* Greenfeld API: Invoice Metadata update was not updating @saliehendricks
+* Prevent access to wallet pags if wallet not set @dennisreimann
+
+### New features
+
+* Greenfield API: Can configure lightning payment methods @Kukks
+
+## 1.0.6.5:
+
+### Improvements:
+
+* Support a subset of output descriptor in the wallet setup @Kukks
+* Improved styling of the notification dropdown (see #2167) @ubolator @dennisreimann
+* API keys and server's url can be shown as QR Code to facilitate pairing @Kukks
+* Greenfield API: Add `DefaultPaymentMethod` to the store's settings @Kukks
+* Greenfield API: Can configure on-chain payment methods @Kukks @NicolasDorier
+* UI Improvements (see this [commit list](https://github.com/btcpayserver/btcpayserver/pull/2151/commits)) @dennisreimann
+
+### Bug fixes:
+
+* Always normalize the invoice's currency in uppercase @NicolasDorier
+* If a label on a wallet's transaction does not have color, it should still show it @NicolasDorier
+* Do not include Tor Location header when querying the modal checkout (see #2180) @Kukks
+* Webhooks should not be randomly deleted anymore. @NicolasDorier
+* Fix header not showing properly after login to BTCPay Server (see #2155) @dennisreimann
+* Bug: Searching invoices was timing out if there was too much invoices @rockstardev @Kukks
+
+### Miscellaneous:
+
+* Removing the old text search engine (DBreeze) @rockstardev @Kukks
+* Add doc for asking permissions to BTCPayServer see [link](docs/greenfield-authorization.md). @Kukks
+
 ## 1.0.6.4:
 
 ### Bug fixes:

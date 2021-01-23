@@ -32,9 +32,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Options;
 using NBitcoin;
 using NBitcoin.DataEncoders;
 using NBXplorer;
+using NBXplorer.DerivationStrategy;
 using StoreData = BTCPayServer.Data.StoreData;
 
 namespace BTCPayServer.Controllers
@@ -67,7 +69,8 @@ namespace BTCPayServer.Controllers
             CssThemeManager cssThemeManager,
             AppService appService,
             IWebHostEnvironment webHostEnvironment,
-            WebhookNotificationManager webhookNotificationManager)
+            WebhookNotificationManager webhookNotificationManager,
+            IOptions<LightningNetworkOptions> lightningNetworkOptions)
         {
             _RateFactory = rateFactory;
             _Repo = repo;
@@ -82,6 +85,7 @@ namespace BTCPayServer.Controllers
             _CssThemeManager = cssThemeManager;
             _appService = appService;
             _webHostEnvironment = webHostEnvironment;
+            _lightningNetworkOptions = lightningNetworkOptions;
             WebhookNotificationManager = webhookNotificationManager;
             _EventAggregator = eventAggregator;
             _NetworkProvider = networkProvider;
@@ -108,6 +112,7 @@ namespace BTCPayServer.Controllers
         private readonly CssThemeManager _CssThemeManager;
         private readonly AppService _appService;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IOptions<LightningNetworkOptions> _lightningNetworkOptions;
         private readonly EventAggregator _EventAggregator;
 
         [TempData]
@@ -695,6 +700,26 @@ namespace BTCPayServer.Controllers
         {
             var parser = new DerivationSchemeParser(network);
             parser.HintScriptPubKey = hint;
+            try
+            {
+                var derivationSchemeSettings = new DerivationSchemeSettings();
+                derivationSchemeSettings.Network = network;
+                var result = parser.ParseOutputDescriptor(derivationScheme);
+                derivationSchemeSettings.AccountOriginal = derivationScheme.Trim();
+                derivationSchemeSettings.AccountDerivation = result.Item1;
+                derivationSchemeSettings.AccountKeySettings = result.Item2?.Select((path, i) => new AccountKeySettings()
+                {
+                    RootFingerprint = path?.MasterFingerprint,
+                    AccountKeyPath = path?.KeyPath,
+                    AccountKey = result.Item1.GetExtPubKeys().ElementAt(i).GetWif(parser.Network)
+                }).ToArray() ?? new AccountKeySettings[result.Item1.GetExtPubKeys().Count()];
+                return derivationSchemeSettings;
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+            
             return new DerivationSchemeSettings(parser.Parse(derivationScheme), network);
         }
 
